@@ -188,27 +188,3 @@
    (let ($cquery $stmts) (tracem cq (compileQuery $query))
          (let $NN (collapse (add-to-kb $kb (superpose $stmts)))
             (tracem qbcout (bc $kb $depth $cquery)))))
-
-;!(compile (: rule2 (Implication (EnchantedBook $book) (And (Reader $reader) (UnderstandsMagicalLanguages $reader $book))) (STV 1.0 1.0)))
-;!(compile (: rule3 (Implication (UnderstandsMagicalLanguages $reader $book) (CanFullyAccess $reader $book)) (STV 1.0 1.0)))
-
-;!(compileQuery (: $query (Implication a (And c (And d e))) $tv))
-
-;(: $query (Implication (And (EnchantedBook $book) (InWhisperingLibrary $book)) (Exists ((: $reader Object)) (CanFullyAccess $reader $book))) $tv))
-
-;!(bind! &kb (init-kb))
-
-;!(compileAdd &kb (: stmt1 (Implication a (And b c)) (STV 0.5 0.5)))
-;!(query &kb (fromNumber 5) (: $query (Implication a b) $tv))
-
-;!(compileAdd &kb (: rule2 (Implication (EnchantedBook $book) (And (Reader $reader) (UnderstandsMagicalLanguages $reader $book))) (STV 1.0 1.0)))
-;!(compileAdd &kb (: rule3 (Implication (UnderstandsMagicalLanguages $reader $book) (CanFullyAccess $reader $book)) (STV 1.0 1.0)))
-
-;!(query &kb (fromNumber 5) (: $query (Implication (And (EnchantedBook $book) (InWhisperingLibrary $book)) (CanFullyAccess $reader $book)) $tv))
-
-;!(compile (: rule1 (Implication a (Or b c)) (STV 1.0 1.0)))
-
-;!(compileQuery (: $query (Implication (And (EnchantedBook $book) (InWhisperingLibrary $book)) (CanFullyAccess $reader $book)) $tv))
-
-
-!(mcompile (: library-book-sale-fact1 (WithTV (And (RaisedAmount LibraryBookSale $2847) (HeldOn LibraryBookSale LastSaturday) (PopularCategory LibraryBookSale MysteryNovels)) (STV 1.0 1.0))))
