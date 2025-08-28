@@ -48,11 +48,11 @@
    (if-decons-expr $type $head $tail
      (if (not (is-variable $head))
        (case $head
-         ((And (inTemplate and-formula $head $tail))
-          (Or (inTemplate or-formula $head $tail))
+         ((And (superpose ((inTemplate and-formula $head $tail) (in (: $prf (superpose $tail) $tv)))))
+          (Or (superpose ((inTemplate or-formula $head $tail) (in (: $prf (superpose $tail) $tv)))))
          ))
-         Emtpy)
-     Emtpy))
+         Empty)
+     Empty))
 
 ;!(in (: prf (And a b) (STV 1.0 1.0)))
 
