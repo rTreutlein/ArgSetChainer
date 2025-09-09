@@ -1,5 +1,4 @@
 !(import! &self utils)
-!(import! &self chainer)
 
 (= (addidx $expr $idx)
   (if-decons-expr $expr $head $tail
@@ -61,16 +60,26 @@
 
 (= (extract-vars $expr) (fold-expr $expr () extract-vars-ff))
 
-(= (subst-exists $a $b $prf)
+
+(= ((seff $vars) ($idx $atom) $elem) (let $elem (exists $idx $vars) ((+ 1 $idx) $atom)))
+
+(= (subst-exists $a $b)
   (let* (($avars (unique= (extract-vars $a)))
          ($bvars (unique= (extract-vars $b)))
-         ($onlyb (unique= (subtraction-atom $bvars $avars))))
-  (foldl-atom $onlyb $b $accum $elem (let $elem (exists $prf) $accum))
+         ($onlyb (unique= (subtraction-atom $bvars $avars)))
+         (($_ $res) (foldl $onlyb (0 $b) (seff $avars))))
+  $res
 ))
 
+(= (uPmapf1 $elem)
+   (unify $elem (: $prf ($rel $a $b) $itv) (if (and (== $rel Implication) (not (is-variable $rel))) (CPU bc (kb depth ((: $prfa $a (STV 1.0 1.0)) |- (: $prfb $b $itv))) $res) $elem) $elem))
+
+(= (uPmapf2 $elem)
+   (unify $elem (: $prfa ($rel $a) (STV $nas $nac)) (if (and (not (is-variable $rel)) (== $rel Not)) (∧ (: $prfa $a (STV $as $ac)) (CPU - (1.0 $as) $nas)) $elem) $elem))
+
 (= (updatePremises $premises)
-  (let $temp (map-atom $premises $elem (unify $elem (: $prf (Implication $a $b) $itv) (CPU bc (kb depth ((: $prfa $a (STV 1.0 1.0)) |- (: $prfb $b $itv))) $res) $elem))
-   (map-atom $temp $elem (unify $elem (: $prfa (Not $a) (STV $nas $nac)) (∧ (: $prfa $a (STV $as $ac)) (CPU - (1.0 $as) $nas)) $elem))))
+  (let $temp (map $premises uPmapf1)
+   (map $temp uPmapf2)))
 
 (= (post ($premises |- $conclusions))
   (let $npremises (updatePremises $premises)
@@ -96,7 +105,7 @@
   (let $npremises (updatePremises $premises)
   (case $conclusions
     ((((: $prf ($relation $a $b) $tv))
-       (if (== $relation Implication)
+       (if (lazy-and (not (is-variable $relation)) (== $relation Implication))
          (superpose ( (post ((munion-atom $npremises ((: $prfa $a $atv) (CPU mp-formula ($atv $tv) $btv))) |- ((: ($prf $prfa) $b $btv))))
                       (in $b)
                       (out $a)
@@ -104,7 +113,7 @@
          ($npremises |- $conclusions))
      )
      (((: $prf ($relation $a) (STV $strength $confidence)))
-       (if (== $relation Not)
+       (if (lazy-and (== $relation Not) (not (is-variable $relation)))
           (post ($npremises |- ((: $prf $a (STV (- 1.0 $strength) $confidence)))))
           ($npremises |- $conclusions))
      )
@@ -136,8 +145,8 @@
       (case $cleanstmt
         (((: $prf ($relation $a $b) $itv)
           (if (== $relation Implication)
-            (let* ( ($nb (subst-exists $a $b $prfa))
-                    ($na (subst-exists $b $a $prfb))
+            (let* ( ($nb (subst-exists $a $b))
+                    ($na (subst-exists $b $a))
                   )
             (post (superpose ( (((: $prfa $a $atv) (CPU mp-formula ($itv $atv) $btv))
                                 |-
@@ -184,7 +193,14 @@
 (= (compileAdd $kb $stmt)
    (add-to-kb $kb (mcompile $stmt)))
 
-(= (query $kb $depth $query)
-   (let ($cquery $stmts) (tracem cq (compileQuery $query))
-         (let $NN (collapse (add-to-kb $kb (superpose $stmts)))
-            (tracem qbcout (bc $kb $depth $cquery)))))
+;!(mcompile (: imlprf (Implication (Or A B) (And C D)) (STV 1.0 1.0)))
+
+;(((: $prfa#65079 (Or A B) $atv#65082) (CPU mp-formula ((STV 1.0 1.0) $atv#65082) $btv#65083)) |- ((: (imlprf $prfa#65079) (And C D) $btv#65083)))
+;(((: $prf#77076 (And C D) (STV $tvs#77077 $tvc#77078)) (CPU math.sqrt ($tvs#77077) $ntvs#77079)) |- ((: (proj 0 $prf#77076) C (STV $ntvs#77079 $tvc#77078))))
+;(((: $prf#77076 (And C D) (STV $tvs#77077 $tvc#77078)) (CPU math.sqrt ($tvs#77077) $ntvs#77079)) |- ((: (proj 1 $prf#77076) D (STV $ntvs#77079 $tvc#77078))))
+;(((: $NN2#79912 A $tv#79908) (: $prf#79909 B $tv#79910) (CPU or-formula ($tv#79908 $tv#79910) $ccltv#78219)) |- ((: (conjunction $NN2#79912 $prf#79909) (Or A B) $ccltv#78219)))
+;
+;(((: $prfsb#65084 (And C D) $btv1#65085) (: $prfb#65081 (And C D) $btv2#65086) (CPU stv< ($btv1#65085 $btv2#65086) True) (: $pa#65087 (Or A B) $atv#65082) (CPU inversion-formula ($atv#65082 $btv1#65085 (STV 1.0 1.0)) $nitv#65088) (CPU mp-formula ($btv2#65086 $nitv#65088) $natv#65089)) |- ((: ((inverted imlprf $pa#65087 $prfsb#65084) $prfb#65081) (Or A B) $natv#65089)))
+;(((: $prf#86425 (Or A B) $tv#86426)) |- ((: (proj 0 $prf#86425) A $tv#86426)))
+;(((: $prf#86425 (Or A B) $tv#86426)) |- ((: (proj 1 $prf#86425) B $tv#86426)))
+;(((: $fstprf#89085 C $tv#89092) (: $prfelem#89082 D $tv#89088) (CPU and-formula ($tv#89092 $tv#89088) $ccltv#87397)) |- ((: (conjunction $fstprf#89085 $prfelem#89082) (And C D) $ccltv#87397)))
