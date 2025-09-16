@@ -32,7 +32,7 @@ class MettalogHandler:
         """Start the mettalog process with stdin/stdout pipes"""
         try:
             self.process = subprocess.Popen(
-                ['mettalog'],
+                ['mettalog','--initial-result-count=inf'],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -178,8 +178,8 @@ class MettalogHandler:
                 # Ignore any errors raised during interpreter shutdown
                 pass
 
-    def add_atom(self, atom: str) -> str:
-        return self._send_command(f'!(compileAdd {self.kb_ref} {atom})')
+    def add_atom(self, atom: str, log:bool=False) -> str:
+        return self._send_command(f'!(compileAdd {self.kb_ref} {atom})', log=log)
 
     def query(self, atom: str, log: bool = False, timeout: float = 300.0) -> List[str]:
         """Query the knowledge base and return results

@@ -67,7 +67,7 @@
   (let* (($avars (unique= (extract-vars $a)))
          ($bvars (unique= (extract-vars $b)))
          ($onlyb (unique= (subtraction-atom $bvars $avars)))
-         (($_ $res) (foldl $onlyb (0 $b) (seff $avars))))
+         (($_ $res) (sealed $onlyb (foldl $onlyb (0 $b) (seff $avars)))))
   $res
 ))
 
@@ -188,19 +188,3 @@
     ((postQuery (() |- ((: $prf $Type $tv))))
      (collapse (postQuery (in (: $prf $Type $tv))))))
   )))
-
-
-(= (compileAdd $kb $stmt)
-   (add-to-kb $kb (mcompile $stmt)))
-
-;!(mcompile (: imlprf (Implication (Or A B) (And C D)) (STV 1.0 1.0)))
-
-;(((: $prfa#65079 (Or A B) $atv#65082) (CPU mp-formula ((STV 1.0 1.0) $atv#65082) $btv#65083)) |- ((: (imlprf $prfa#65079) (And C D) $btv#65083)))
-;(((: $prf#77076 (And C D) (STV $tvs#77077 $tvc#77078)) (CPU math.sqrt ($tvs#77077) $ntvs#77079)) |- ((: (proj 0 $prf#77076) C (STV $ntvs#77079 $tvc#77078))))
-;(((: $prf#77076 (And C D) (STV $tvs#77077 $tvc#77078)) (CPU math.sqrt ($tvs#77077) $ntvs#77079)) |- ((: (proj 1 $prf#77076) D (STV $ntvs#77079 $tvc#77078))))
-;(((: $NN2#79912 A $tv#79908) (: $prf#79909 B $tv#79910) (CPU or-formula ($tv#79908 $tv#79910) $ccltv#78219)) |- ((: (conjunction $NN2#79912 $prf#79909) (Or A B) $ccltv#78219)))
-;
-;(((: $prfsb#65084 (And C D) $btv1#65085) (: $prfb#65081 (And C D) $btv2#65086) (CPU stv< ($btv1#65085 $btv2#65086) True) (: $pa#65087 (Or A B) $atv#65082) (CPU inversion-formula ($atv#65082 $btv1#65085 (STV 1.0 1.0)) $nitv#65088) (CPU mp-formula ($btv2#65086 $nitv#65088) $natv#65089)) |- ((: ((inverted imlprf $pa#65087 $prfsb#65084) $prfb#65081) (Or A B) $natv#65089)))
-;(((: $prf#86425 (Or A B) $tv#86426)) |- ((: (proj 0 $prf#86425) A $tv#86426)))
-;(((: $prf#86425 (Or A B) $tv#86426)) |- ((: (proj 1 $prf#86425) B $tv#86426)))
-;(((: $fstprf#89085 C $tv#89092) (: $prfelem#89082 D $tv#89088) (CPU and-formula ($tv#89092 $tv#89088) $ccltv#87397)) |- ((: (conjunction $fstprf#89085 $prfelem#89082) (And C D) $ccltv#87397)))
